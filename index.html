@@ -11,13 +11,13 @@
 </head>
 <body class="bg-gradient-to-br from-purple-100 to-blue-50 text-gray-800 font-sans">
 
-  
+ 
   <header class="text-center py-6 bg-white shadow-md">
     <h1 class="text-3xl font-bold text-purple-700">🛍️ Javi's Enterprises</h1>
     <p class="text-sm text-gray-600 mt-2">Search, shop & style with elegance.</p>
   </header>
 
-  <!-- Navbar with Cart -->
+  
   <nav class="bg-purple-700 text-white sticky top-0 z-50 shadow-md px-4 py-4 flex justify-between items-center">
     <div class="text-lg font-semibold">Javi's Shop</div>
     <button onclick="toggleCart()" class="relative">
@@ -25,13 +25,9 @@
     </button>
   </nav>
 
-  
-  <section class="max-w-5xl mx-auto px-4 py-6">
-    <div class="grid sm:grid-cols-4 gap-4">
-      <input id="searchInput" type="text" placeholder="Search for clothes..." class="sm:col-span-2 px-4 py-2 border rounded focus:ring-2 focus:ring-purple-400 w-full" />
-      <input id="minPrice" type="number" placeholder="Min $" class="px-4 py-2 border rounded focus:ring-2 focus:ring-purple-400 w-full" />
-      <input id="maxPrice" type="number" placeholder="Max $" class="px-4 py-2 border rounded focus:ring-2 focus:ring-purple-400 w-full" />
-    </div>
+
+  <section class="max-w-3xl mx-auto px-4 py-6">
+    <input id="searchInput" type="text" placeholder="Search for clothes..." class="w-full px-4 py-2 border rounded focus:ring-2 focus:ring-purple-400" />
     <div class="text-center mt-4">
       <button onclick="searchClothes()" class="bg-purple-600 text-white px-6 py-2 rounded hover:bg-purple-800 transition">Search</button>
     </div>
@@ -57,7 +53,6 @@
       <button onclick="checkout()" class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 transition">Buy Now</button>
     </div>
   </div>
-
   <script src="main.js"></script>
 </body>
 </html>
