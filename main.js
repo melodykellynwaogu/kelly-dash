@@ -1,8 +1,31 @@
-// Cart initialization
-let cart = JSON.parse(localStorage.getItem("cart")) || [];
+function getSessionId() {
+  let match = document.cookie.match('(^|;)\\s*cartSessionId\\s*=\\s*([^;]+)');
+  if (match) return match.pop();
+  // Create a new UUID (can use Date.now + Math.random for simplicity if crypto unavailable)
+  const sessionId = (crypto.randomUUID && crypto.randomUUID()) ||
+    ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+      (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+    );
+  document.cookie = `cartSessionId=${sessionId}; path=/; max-age=2592000`; // 30 days
+  return sessionId;
+}
+
+function getCartKey() {
+  return `cart_${getSessionId()}`;
+}
+
+function getCart() {
+  return JSON.parse(localStorage.getItem(getCartKey())) || [];
+}
+
+function setCart(cart) {
+  localStorage.setItem(getCartKey(), JSON.stringify(cart));
+}
+
+
+
 window.searchResults = [];
 
-// Toggle cart drawer
 function toggleCart() {
   const drawer = document.getElementById("cartDrawer");
   drawer.classList.toggle("translate-x-full");
@@ -10,7 +33,6 @@ function toggleCart() {
   renderCart();
 }
 
-// Search for clothes/products
 function searchClothes() {
   const query = document.getElementById("searchInput").value.trim().toLowerCase();
   const resultsContainer = document.getElementById("productResults");
@@ -49,30 +71,25 @@ function searchClothes() {
     });
 }
 
-// Add to cart by product ID (safer than passing product object in HTML)
 function addToCartById(id) {
   const product = window.searchResults.find(p => p.id === id);
   if (product) addToCart(product);
 }
 
-// Add product to cart
 function addToCart(product) {
-  // Ensure cart is up-to-date
-  cart = JSON.parse(localStorage.getItem("cart")) || [];
+  let cart = getCart();
   const existing = cart.find(item => item.id === product.id);
   if (existing) {
     existing.quantity += 1;
   } else {
     cart.push({ ...product, quantity: 1 });
   }
-  localStorage.setItem("cart", JSON.stringify(cart));
+  setCart(cart);
   updateCartCount();
 }
 
-// Render cart drawer items and total
 function renderCart() {
-  // Always reload cart from localStorage
-  cart = JSON.parse(localStorage.getItem("cart")) || [];
+  let cart = getCart();
   const cartItems = document.getElementById("cartItems");
   const cartTotal = document.getElementById("cartTotal");
   cartItems.innerHTML = "";
@@ -114,37 +131,33 @@ function renderCart() {
   const buyBtn = document.getElementById("buyNowBtn");
   buyBtn.disabled = false;
   buyBtn.classList.remove("opacity-50", "cursor-not-allowed");
-  localStorage.setItem("cart", JSON.stringify(cart));
+  setCart(cart);
 }
 
-// Update product quantity in cart
 function updateQty(index, change) {
-  cart = JSON.parse(localStorage.getItem("cart")) || [];
+  let cart = getCart();
   if (!cart[index]) return;
   cart[index].quantity += change;
   if (cart[index].quantity < 1) cart.splice(index, 1);
+  setCart(cart);
   renderCart();
-  localStorage.setItem("cart", JSON.stringify(cart));
 }
 
-// Remove an item from the cart
 function removeItem(index) {
-  cart = JSON.parse(localStorage.getItem("cart")) || [];
+  let cart = getCart();
   cart.splice(index, 1);
+  setCart(cart);
   renderCart();
-  localStorage.setItem("cart", JSON.stringify(cart));
 }
 
-// Update cart count badge in nav
 function updateCartCount() {
-  cart = JSON.parse(localStorage.getItem("cart")) || [];
+  let cart = getCart();
   const count = cart.reduce((sum, item) => sum + item.quantity, 0);
   document.getElementById("cart-count").innerText = count;
 }
 
-// Checkout function, clears cart
 function checkout() {
-  cart = JSON.parse(localStorage.getItem("cart")) || [];
+  let cart = getCart();
   if (!cart.length) {
     alert("Your cart is empty!");
     return;
@@ -152,9 +165,11 @@ function checkout() {
 
   alert("✅ Thank you for your purchase! Your order has been placed.");
   cart = [];
+  setCart(cart);
   renderCart();
   updateCartCount();
-  localStorage.removeItem("cart");
+  // Optionally: remove cart for this session completely
+  // localStorage.removeItem(getCartKey());
 }
 
 // Support "Enter" key for search
@@ -164,10 +179,9 @@ document.getElementById("searchInput").addEventListener("keydown", function(e) {
   }
 });
 
-// Search button click
 document.getElementById("searchBtn").addEventListener("click", searchClothes);
 
-// Make all functions globally accessible for inline HTML events
+// Expose functions for inline events
 window.toggleCart = toggleCart;
 window.addToCart = addToCart;
 window.addToCartById = addToCartById;
@@ -177,5 +191,5 @@ window.renderCart = renderCart;
 window.checkout = checkout;
 window.updateCartCount = updateCartCount;
 
-// Initial cart badge update on page load
+// Initial
 updateCartCount();
